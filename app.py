@@ -1,48 +1,107 @@
-import os
 import streamlit as st
+import requests
+import base64
 
+# ----------------------
+# Base API URL
+# ----------------------
+API_URL = "https://api-520917056692.europe-west1.run.app/predict"
 
-# Define the base URI of the API
-#   - Potential sources are in `.streamlit/secrets.toml` or in the Secrets section
-#     on Streamlit Cloud
-#   - The source selected is based on the shell variable passend when launching streamlit
-#     (shortcuts are included in Makefile). By default it takes the cloud API url
-#if 'API_URI' in os.environ:
-#    BASE_URI = st.secrets[os.environ.get('API_URI')]
-#else:
-#    BASE_URI = st.secrets['cloud_api_uri']
-# Add a '/' at the end if it's not there
-#BASE_URI = BASE_URI if BASE_URI.endswith('/') else BASE_URI + '/'
-# Define the url to be used by requests.get to get a prediction (adapt if needed)
-#url = BASE_URI + 'predict'
+# ----------------------
+# Page config with shopping cart sticker favicon
+# ----------------------
+st.set_page_config(
+    page_title="Personal Shopping Assistant",
+    page_icon="https://em-content.zobj.net/thumbs/240/apple/325/shopping-cart_1f6d2.png",
+    layout="wide"
+)
 
-# Just displaying the source for the API. Remove this in your final version.
-#st.markdown(f"Working with {url}")
+# ----------------------
+# Load external CSS
+# ----------------------
+with open("style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-st.markdown("Now, the rest is up to you. Start creating your page.")
+# ----------------------
+# Header
+# ----------------------
+st.markdown("<h1 style='text-align:center;'>Personal Shopping Assistant</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align:center; color:#666;'>Select a category, gender, and paste a product link. We provide 5 suggestions.</p>",
+    unsafe_allow_html=True
+)
+st.write("")
 
+# ----------------------
+# User input dropdowns
+# ----------------------
+col1, col2, col3 = st.columns(3)
 
-# TODO: Add some titles, introduction, ...
+with col1:
+    category = st.selectbox("Category", ["Shoes", "Shirts", "Pants", "Accessories", "Other"])
 
+with col2:
+    gender = st.selectbox("Gender", ["Men", "Women", "Unisex", "Kids"])
 
-# TODO: Request user input
+with col3:
+    brand = st.selectbox("Brand", ["Any", "Nike", "Adidas", "Puma", "Other"])
 
+st.write("")
+image_url = st.text_input("Product link", placeholder="Paste a product URL here")
+st.write("")
 
-# TODO: Call the API using the user's input
-#   - url is already defined above
-#   - create a params dict based on the user's input
-#   - finally call your API using the requests package
+# ----------------------
+# Action button
+# ----------------------
+if st.button("Get Suggestions"):
+    if not image_url:
+        st.warning("Please paste a product link.")
+    else:
+        st.success("Here are some suggested products:")
 
+        # ----------------------
+        # Call deployed API
+        # ----------------------
+        try:
+            params = {
+                "image_path": image_url,
+                "top_k": 5,
+                "category": category,
+                "gender": gender,
+                "brand": brand
+            }
+            response = requests.get(API_URL, params=params)
+            suggestions = response.json()  # List of suggestions
 
-# TODO: retrieve the results
-#   - add a little check if you got an ok response (status code 200) or something else
-#   - retrieve the prediction from the JSON
+            # ----------------------
+            # Combine input + suggestions into horizontal row
+            # ----------------------
+            cards_html = "<div class='product-grid'>"
 
+            # Input card
+            cards_html += f"""
+            <div class='product-card'>
+                <img src='{image_url}' />
+                <h4>Your input</h4>
+            </div>
+            """
 
-# TODO: display the prediction in some fancy way to the user
+            # Suggested products
+            for product in suggestions:
+                cards_html += f"""
+                <div class='product-card'>
+                    <img src='data:image/jpeg;base64,{product["data"]}' />
+                    <h4>{product["name"]}</h4>
+                </div>
+                """
 
+            cards_html += "</div>"
+            st.markdown(cards_html, unsafe_allow_html=True)
 
-# TODO: [OPTIONAL] maybe you can add some other pages?
-#   - some statistical data you collected in graphs
-#   - description of your product
-#   - a 'Who are we?'-page
+        except Exception as e:
+            st.error(f"Could not fetch suggestions from the model: {e}")
+
+# ----------------------
+# Footer
+# ----------------------
+st.markdown("<div class='footer'>Minimal. Neutral. Modern.</div>", unsafe_allow_html=True)
