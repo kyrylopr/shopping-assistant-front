@@ -11,7 +11,11 @@ with st.form("search_form"):
     url = st.text_input("Paste an image URL:")
     gender = st.selectbox("Gender (optional)", ["All", "Menswear", "Ladieswear", "Baby/Children"])
     subcategory = st.selectbox("Subcategory (optional):", ['Boots', 'Sneakers', 'Other shoe', 'Sandals', 'Slippers', 'Ballerinas', 'Flat shoe', 'Wedge', 'Pumps', 'Flip flop', 'Bootie', 'Heeled sandals', 'Flat shoes', 'Heels', 'Moccasins', 'Pre-walkers'])
-    submitted = st.form_submit_button("Search")
+    button_col, slider_col = st.columns([1, 3])
+    with button_col:
+        submitted = st.form_submit_button("Search")
+    with slider_col:
+        top_k = st.slider("Number of results", min_value=1, max_value=5, value=5)
 
 if submitted:
 
@@ -19,7 +23,7 @@ if submitted:
     st.image(url, caption="Your image", width=300)
 
     #Build API params
-    params = {"image_path": url, "top_k": 5}
+    params = {"image_path": url, "top_k": top_k}
     if gender != "All":
         params["gender"] = gender
     if subcategory:
