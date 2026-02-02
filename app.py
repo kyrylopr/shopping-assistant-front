@@ -6,17 +6,28 @@ import base64
 #Title
 st.title("Personal Shopping Assistant")
 
-#Image link and search
+#Image link and filters
 with st.form("search_form"):
     url = st.text_input("Paste an image URL:")
+    gender = st.selectbox("Gender (optional)", ["All", "Menswear", "Ladieswear", "Baby/Children"])
+    subcategory = st.selectbox("Subcategory (optional):", ['Boots', 'Sneakers', 'Other shoe', 'Sandals', 'Slippers', 'Ballerinas', 'Flat shoe', 'Wedge', 'Pumps', 'Flip flop', 'Bootie', 'Heeled sandals', 'Flat shoes', 'Heels', 'Moccasins', 'Pre-walkers'])
     submitted = st.form_submit_button("Search")
 
 if submitted:
 
     #Display the input image
     st.image(url, caption="Your image", width=300)
+
+    #Build API params
+    params = {"image_path": url, "top_k": 5}
+    if gender != "All":
+        params["gender"] = gender
+    if subcategory:
+        params["subcategory"] = subcategory
+
+    #Call the API
     response = requests.get("https://api-520917056692.europe-west1.run.app/predict",
-                            params={"image_path": url, "top_k": 5})
+                            params=params)
 
     if response.status_code == 200:
         st.markdown("### Recommendations:")
