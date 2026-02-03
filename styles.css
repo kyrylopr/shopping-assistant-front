@@ -1,0 +1,30 @@
+header[data-testid="stHeader"] {
+    background-color: transparent;
+    padding: 10px 20px;
+}
+
+header[data-testid="stHeader"]::after {
+    content: "YOUR PERSONAL SHOPPING ASSISTANT";
+    font-size: 14px;
+    color: inherit;
+    position: absolute;
+    left: 20px;
+    top: 15px;
+}
+
+.price-tag {
+    background-color: #FFD700;
+    color: black;
+    font-weight: bold;
+    font-size: 1.4em;
+    padding: 5px 15px;
+    border-radius: 5px;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.section-header {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 10px;
+}

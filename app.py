@@ -2,61 +2,37 @@ import streamlit as st
 import requests
 import base64
 import random
+from pathlib import Path
 
 
-#Header - fixed for dark mode
-st.markdown("""
-<style>
-header[data-testid="stHeader"] {
-    background-color: transparent;
-    padding: 10px 20px;
-}
-header[data-testid="stHeader"]::after {
-    content: "Your Personal Shopping Assistant";
-    font-size: 14px;
-    color: inherit;
-    position: absolute;
-    left: 20px;
-    top: 15px;
-}
-.price-tag {
-    background-color: #FFD700;
-    color: black;
-    font-weight: bold;
-    font-size: 1.4em;
-    padding: 5px 15px;
-    border-radius: 5px;
-    display: inline-block;
-    margin: 10px 0;
-}
-.section-header {
-    font-size: 1.1em;
-    color: #666;
-    margin-bottom: 10px;
-}
-</style>
-""", unsafe_allow_html=True)
+# Load CSS from external file
+def load_css(file_path):
+    with open(file_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+load_css(Path(__file__).parent / "styles.css")
 
 #Title
-st.title("Personal Shopping Assistant")
+#st.title("Personal Shopping Assistant")
 
 #Image link and filters
 form_col, image_col = st.columns([1, 1])
 with form_col:
     with st.form("search_form"):
         url = st.text_input("Paste an image URL:")
-        gender = st.selectbox("Gender (optional)", ["All", "Menswear", "Ladieswear", "Baby/Children"])
+        gender = st.selectbox("Gender (optional)", ["Auto", "Menswear", "Ladieswear", "Baby/Children"])
         subcategory = st.selectbox("Category (optional):", ['Auto', 'Boots', 'Sneakers', 'Sandals', 'Slippers', 'Flat shoe', 'Heels'])
         button_col, topk_col = st.columns([1, 1])
         with button_col:
             submitted = st.form_submit_button("Search")
         with topk_col:
-            top_k = st.selectbox("Number of results", [1, 2, 3, 4, 5], index=4)
+            top_k = st.selectbox("Number of results", [2, 4, 6], index=2)
 
 #Save results to session state on search
 if submitted:
     params = {"image_path": url, "top_k": top_k}
-    if gender and gender != "All":
+    if gender and gender != "Auto":
         params["gender"] = gender
     # Only add subcategory if it's not Auto (Auto means let the model decide)
     if subcategory and subcategory not in ["Auto", "None", ""]:
@@ -87,31 +63,41 @@ if "results" in st.session_state:
     prices = st.session_state.get("prices", [50] * len(results))
     freq_prices = st.session_state.get("freq_prices", [50] * len(results))
 
-    idx = st.slider("Browse recommendations", min_value=1, max_value=len(results), value=1) - 1
-    img = results[idx]
-    price = prices[idx] if idx < len(prices) else random.randint(30, 100)
-    freq_price = freq_prices[idx] if idx < len(freq_prices) else random.randint(30, 100)
+    # Results come in pairs: similar product + frequently bought together
+    num_pairs = len(results) // 2
+    pair_idx = st.slider("Browse recommendations", min_value=1, max_value=max(1, num_pairs), value=1) - 1
+
+    # Get the pair: similar product (even index) and frequently bought (odd index)
+    similar_idx = pair_idx * 2
+    freq_idx = pair_idx * 2 + 1
+
+    similar_img = results[similar_idx] if similar_idx < len(results) else None
+    freq_img = results[freq_idx] if freq_idx < len(results) else None
+
+    price = prices[similar_idx] if similar_idx < len(prices) else random.randint(30, 100)
+    freq_price = freq_prices[freq_idx] if freq_idx < len(freq_prices) else random.randint(30, 100)
 
     # Similar item section
-    st.markdown('<p class="section-header"> Similar Product:</p>', unsafe_allow_html=True)
-    img_col, info_col = st.columns([1, 1])
-    with img_col:
-        st.image(base64.b64decode(img["data"]), width=300)
-    with info_col:
-        st.markdown(f"**{img.get('name', '')}**")
-        st.markdown(f'<span class="price-tag">€{price}</span>', unsafe_allow_html=True)
-        st.text(f"Category: {img.get('subcategory', 'Unknown')}")
-        st.text(f"Gender: {img.get('gender', 'Unknown')}")
+    if similar_img:
+        st.markdown('<p class="section-header"> Similar Product:</p>', unsafe_allow_html=True)
+        img_col, info_col = st.columns([1, 1])
+        with img_col:
+            st.image(base64.b64decode(similar_img["data"]), width=300)
+        with info_col:
+            st.markdown(f"**{similar_img.get('name', '')}**")
+            st.markdown(f'<span class="price-tag">€{price}</span>', unsafe_allow_html=True)
+            st.text(f"Category: {similar_img.get('subcategory', 'Unknown')}")
+            st.text(f"Gender: {similar_img.get('gender', 'Unknown')}")
 
-    # Frequently bought together section (mock data - using same image as placeholder)
-    st.markdown("---")
-    st.markdown('<p class="section-header"> Frequently Bought Together:</p>', unsafe_allow_html=True)
-    freq_col, freq_info_col = st.columns([1, 1])
-    with freq_col:
-        # Using same image as mock - in production this would be different data from API
-        st.image(base64.b64decode(img["data"]), width=300)
-    with freq_info_col:
-        st.markdown(f"**Matching {img.get('subcategory', 'Item')}**")
-        st.markdown(f'<span class="price-tag">€{freq_price}</span>', unsafe_allow_html=True)
-        st.text(f"Category: {img.get('subcategory', 'Unknown')}")
-        st.text(f"Gender: {img.get('gender', 'Unknown')}")
+    # Frequently bought together section
+    if freq_img:
+        st.markdown("---")
+        st.markdown('<p class="section-header"> Frequently Bought Together:</p>', unsafe_allow_html=True)
+        freq_col, freq_info_col = st.columns([1, 1])
+        with freq_col:
+            st.image(base64.b64decode(freq_img["data"]), width=300)
+        with freq_info_col:
+            st.markdown(f"**{freq_img.get('name', '')}**")
+            st.markdown(f'<span class="price-tag">€{freq_price}</span>', unsafe_allow_html=True)
+            st.text(f"Category: {freq_img.get('subcategory', 'Unknown')}")
+            st.text(f"Gender: {freq_img.get('gender', 'Unknown')}")
