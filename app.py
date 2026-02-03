@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import base64
-import random
 from pathlib import Path
 
 
@@ -44,10 +43,6 @@ if submitted:
     if response.status_code == 200:
         st.session_state["results"] = response.json()
         st.session_state["search_url"] = url
-        # Generate random prices for similar items (30-100€)
-        st.session_state["prices"] = [random.randint(30, 100) for _ in range(top_k)]
-        # Generate random prices for frequently bought items (30-100€)
-        st.session_state["freq_prices"] = [random.randint(30, 100) for _ in range(top_k)]
     else:
         st.error(f"API error: {response.status_code} - {response.text}")
 
@@ -60,8 +55,6 @@ if "search_url" in st.session_state:
 if "results" in st.session_state:
     st.markdown("### Recommendations:")
     results = st.session_state["results"]
-    prices = st.session_state.get("prices", [50] * len(results))
-    freq_prices = st.session_state.get("freq_prices", [50] * len(results))
 
     # Results come in pairs: similar product + frequently bought together
     num_pairs = len(results) // 2
@@ -74,9 +67,6 @@ if "results" in st.session_state:
     similar_img = results[similar_idx] if similar_idx < len(results) else None
     freq_img = results[freq_idx] if freq_idx < len(results) else None
 
-    price = prices[similar_idx] if similar_idx < len(prices) else random.randint(30, 100)
-    freq_price = freq_prices[freq_idx] if freq_idx < len(freq_prices) else random.randint(30, 100)
-
     # Similar item section
     if similar_img:
         st.markdown('<p class="section-header"> Similar Product:</p>', unsafe_allow_html=True)
@@ -85,7 +75,7 @@ if "results" in st.session_state:
             st.image(base64.b64decode(similar_img["data"]), width=300)
         with info_col:
             st.markdown(f"**{similar_img.get('name', '')}**")
-            st.markdown(f'<span class="price-tag">€{price}</span>', unsafe_allow_html=True)
+            st.markdown(f'<span class="price-tag">€{similar_img.get("price", 0)}</span>', unsafe_allow_html=True)
             st.text(f"Category: {similar_img.get('subcategory', 'Unknown')}")
             st.text(f"Gender: {similar_img.get('gender', 'Unknown')}")
 
@@ -98,6 +88,6 @@ if "results" in st.session_state:
             st.image(base64.b64decode(freq_img["data"]), width=300)
         with freq_info_col:
             st.markdown(f"**{freq_img.get('name', '')}**")
-            st.markdown(f'<span class="price-tag">€{freq_price}</span>', unsafe_allow_html=True)
+            st.markdown(f'<span class="price-tag">€{freq_img.get("price", 0)}</span>', unsafe_allow_html=True)
             st.text(f"Category: {freq_img.get('subcategory', 'Unknown')}")
             st.text(f"Gender: {freq_img.get('gender', 'Unknown')}")
