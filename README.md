@@ -195,5 +195,5 @@ make streamlit_local
 ---
 
 <p align="center">
-  <b>🎓 Le Wagon Graduation Project 2025</b>
+  <b>🎓 Le Wagon Graduation Project 2026</b>
 </p>
