@@ -1,3 +1,17 @@
+/* Import Roboto font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Apply Roboto font everywhere */
+html, body, [class*="css"] {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+/* Remove all rounded corners globally */
+*, *::before, *::after {
+    border-radius: 0 !important;
+}
+
+/* Header styling */
 header[data-testid="stHeader"] {
     background-color: transparent;
     padding: 10px 20px;
@@ -5,26 +19,104 @@ header[data-testid="stHeader"] {
 
 header[data-testid="stHeader"]::after {
     content: "YOUR PERSONAL SHOPPING ASSISTANT";
-    font-size: 14px;
+    font-size: 28px;
+    font-weight: 700;
     color: inherit;
     position: absolute;
     left: 20px;
-    top: 15px;
+    top: 10px;
 }
 
-.price-tag {
-    background-color: #FFD700;
-    color: black;
-    font-weight: bold;
-    font-size: 1.4em;
-    padding: 5px 15px;
-    border-radius: 5px;
-    display: inline-block;
-    margin: 10px 0;
+/* Product name styling, uppercase */
+.product-name {
+    font-size: 1.9em !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: black !important;
+    margin: 0 0 10px 0 !important;
+    font-family: 'Roboto', sans-serif !important;
 }
 
+/* Product price styling - slightly larger */
+.product-price {
+    font-size: 1.2em !important;
+    color: black !important;
+    margin: 5px 0 !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+/* Product info styling - subcategory, gender */
+.product-info {
+    font-size: 1em !important;
+    color: #555 !important;
+    margin: 5px 0 !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+/* Section header styling */
 .section-header {
-    font-size: 1.1em;
-    color: #666;
-    margin-bottom: 10px;
+    font-size: 0.7em !important;
+    color: #666 !important;
+    margin-bottom: 10px !important;
+    font-family: 'Roboto', sans-serif !important;
+    text-transform: uppercase !important;
+}
+
+/* Search button - black and white */
+button[kind="primaryFormSubmit"],
+button[data-testid="stFormSubmitButton"] > button,
+.stFormSubmitButton > button,
+div[data-testid="stFormSubmitButton"] button {
+    background-color: black !important;
+    color: white !important;
+    border: 2px solid black !important;
+    border-radius: 0 !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+button[kind="primaryFormSubmit"]:hover,
+button[data-testid="stFormSubmitButton"] > button:hover,
+.stFormSubmitButton > button:hover,
+div[data-testid="stFormSubmitButton"] button:hover {
+    background-color: white !important;
+    color: black !important;
+    border: 2px solid black !important;
+}
+
+/* Input fields - sharp edges */
+input, select, textarea,
+.stTextInput > div > div > input,
+.stSelectbox > div > div,
+div[data-baseweb="select"] > div {
+    border-radius: 0 !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+/* Hide form submit hint text */
+.stTextInput [data-testid="InputInstructions"],
+.stForm [data-testid="InputInstructions"],
+div[data-testid="InputInstructions"] {
+    display: none !important;
+}
+
+/* Slider - sharp edges and hide min/max labels */
+div[data-testid="stSlider"] > div > div > div {
+    border-radius: 0 !important;
+}
+
+div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stTickBarMax"] {
+    display: none !important;
+}
+
+/* Image containers - sharp edges */
+img, .stImage {
+    border-radius: 0 !important;
+}
+
+/* Cards and containers - sharp edges */
+div[data-testid="stVerticalBlock"],
+div[data-testid="stHorizontalBlock"],
+.element-container {
+    border-radius: 0 !important;
 }

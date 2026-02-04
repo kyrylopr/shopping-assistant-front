@@ -3,6 +3,11 @@ import requests
 import base64
 from pathlib import Path
 
+# Set page config with favicon (must be first Streamlit command)
+st.set_page_config(
+    page_title="Shopping Assistant",
+    page_icon="assets/favicon.svg"
+)
 
 # Load CSS from external file
 def load_css(file_path):
@@ -20,7 +25,7 @@ form_col, image_col = st.columns([1, 1])
 with form_col:
     with st.form("search_form"):
         url = st.text_input("Paste an image URL:")
-        gender = st.selectbox("Gender (optional)", ["Auto", "Menswear", "Ladieswear", "Baby/Children"])
+        gender = st.selectbox("Gender (optional):", ["Auto", "Menswear", "Ladieswear", "Baby/Children"])
         subcategory = st.selectbox("Category (optional):", ['Auto', 'Boots', 'Sneakers', 'Sandals', 'Slippers', 'Flat shoe', 'Heels'])
         button_col, topk_col = st.columns([1, 1])
         with button_col:
@@ -49,45 +54,48 @@ if submitted:
 #Display input image on the right
 if "search_url" in st.session_state:
     with image_col:
-        st.image(st.session_state["search_url"], caption="Your image")
+        st.image(st.session_state["search_url"], caption="Provided Example")
 
 #Display results from session state
 if "results" in st.session_state:
     st.markdown("### Recommendations:")
     results = st.session_state["results"]
 
-    # Results come in pairs: similar product + frequently bought together
+    # Results: first half = similar items, second half = sales suggestions
     num_pairs = len(results) // 2
-    pair_idx = st.slider("Browse recommendations", min_value=1, max_value=max(1, num_pairs), value=1) - 1
+    if num_pairs > 1:
+        pair_idx = st.slider("", min_value=1, max_value=num_pairs, value=1, label_visibility="collapsed") - 1
+    else:
+        pair_idx = 0
 
-    # Get the pair: similar product (even index) and frequently bought (odd index)
-    similar_idx = pair_idx * 2
-    freq_idx = pair_idx * 2 + 1
+    # Get the pair: similar product (first half) + frequently bought (second half)
+    similar_idx = pair_idx
+    freq_idx = pair_idx + num_pairs
 
     similar_img = results[similar_idx] if similar_idx < len(results) else None
     freq_img = results[freq_idx] if freq_idx < len(results) else None
 
     # Similar item section
     if similar_img:
-        st.markdown('<p class="section-header"> Similar Product:</p>', unsafe_allow_html=True)
         img_col, info_col = st.columns([1, 1])
         with img_col:
             st.image(base64.b64decode(similar_img["data"]), width=300)
         with info_col:
-            st.markdown(f"**{similar_img.get('name', '')}**")
-            st.markdown(f'<span class="price-tag">€{similar_img.get("price", 0)}</span>', unsafe_allow_html=True)
-            st.text(f"Category: {similar_img.get('subcategory', 'Unknown')}")
-            st.text(f"Gender: {similar_img.get('gender', 'Unknown')}")
+            st.markdown('<p class="section-header">Similar Product:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-name">{similar_img.get("name", "")}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-price">Price: €{similar_img.get("price", 0)}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-info">Category: {similar_img.get("subcategory", "Unknown").replace("Subcategory: ", "")}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-info">{similar_img.get("gender", "Unknown").replace("Gender: ", "")}</p>', unsafe_allow_html=True)
 
     # Frequently bought together section
     if freq_img:
         st.markdown("---")
-        st.markdown('<p class="section-header"> Frequently Bought Together:</p>', unsafe_allow_html=True)
         freq_col, freq_info_col = st.columns([1, 1])
         with freq_col:
             st.image(base64.b64decode(freq_img["data"]), width=300)
         with freq_info_col:
-            st.markdown(f"**{freq_img.get('name', '')}**")
-            st.markdown(f'<span class="price-tag">€{freq_img.get("price", 0)}</span>', unsafe_allow_html=True)
-            st.text(f"Category: {freq_img.get('subcategory', 'Unknown')}")
-            st.text(f"Gender: {freq_img.get('gender', 'Unknown')}")
+            st.markdown('<p class="section-header">Frequently Bought Together:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-name">{freq_img.get("name", "")}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-price">Price: €{freq_img.get("price", 0)}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-info">Category: {freq_img.get("subcategory", "Unknown").replace("Subcategory: ", "")}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="product-info">{freq_img.get("gender", "Unknown").replace("Gender: ", "")}</p>', unsafe_allow_html=True)
