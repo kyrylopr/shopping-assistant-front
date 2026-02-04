@@ -25,13 +25,13 @@ form_col, image_col = st.columns([1, 1])
 with form_col:
     with st.form("search_form"):
         url = st.text_input("Paste an image URL:")
-        gender = st.selectbox("Gender (optional):", ["Auto", "Menswear", "Ladieswear", "Baby/Children"])
+        gender = st.selectbox("Group (optional):", ["Auto", "Menswear", "Ladieswear", "Baby/Children"])
         subcategory = st.selectbox("Category (optional):", ['Auto', 'Boots', 'Sneakers', 'Sandals', 'Slippers', 'Flat shoe', 'Heels'])
         button_col, topk_col = st.columns([1, 1])
         with button_col:
             submitted = st.form_submit_button("Search")
         with topk_col:
-            top_k = st.selectbox("Number of results", [2, 4, 6], index=2)
+            top_k = st.selectbox("Number of results", [2, 4, 6, 8], index=2)
 
 #Save results to session state on search
 if submitted:
