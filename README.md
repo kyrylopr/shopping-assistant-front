@@ -63,7 +63,7 @@ An AI-powered visual search and recommendation system for footwear, combining de
 |-----------|-------|
 | Architecture | **EfficientNetB1** (transfer learning) |
 | Classes | 3 (Baby/Children, Ladieswear, Menswear) |
-| Test Accuracy | **83.3%** |
+| Test Accuracy | **84%** |
 
 ---
 
