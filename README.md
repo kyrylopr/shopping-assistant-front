@@ -192,6 +192,11 @@ make streamlit_local
 
 **Le Wagon Data Science & AI Bootcamp — Batch #2201 (Online)**
 
+- [Anas Selmi](https://github.com/Anas-sel)
+- [Jessica Arndt](https://github.com/JessicaLoA)
+- [Kyrylo Prymak](https://github.com/kyrylopr)
+- [Mererim Burkanova](https://github.com/meerim-b)
+- [Shweta Goyal](https://github.com/shweta-1812)
 ---
 
 <p align="center">
